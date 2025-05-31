@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "outDir": "./dist",
+    // Η γραμμή "rootDir" θα πρέπει να δείχνει στον τρέχοντα φάκελο (όπου βρίσκεται το tsconfig.json)
+    "rootDir": "./", 
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "server.ts",
+    "seed-db.ts",
+    "insert-transactions.ts"
+    // Αν έχεις άλλα αρχεία .ts απευθείας στον φάκελο 'sockets', πρόσθεσέ τα εδώ χωρίς το πρόθεμα 'sockets/'
+  ],
+  "exclude": [
+    "./dist" // Πρέπει να αποκλείσεις τον φάκελο εξόδου για να μην προσπαθήσει να κάνει compile τα ήδη μεταγλωττισμένα αρχεία
+  ]
+}

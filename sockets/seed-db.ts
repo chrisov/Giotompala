@@ -6,6 +6,7 @@ import { unlink } from 'fs/promises';
 async function seedDatabase() {
     // Αλλάζουμε το όνομα του αρχείου της βάσης δεδομένων σε purchases.db
     // ΧΡΗΣΙΜΟΠΟΙΟΥΜΕ process.cwd() ΓΙΑ ΣΥΝΕΠΕΙΑ ΜΕ ΤΑ ΑΛΛΑ SCRIPTS
+    // ΕΔΩ ΠΡΟΣΘΕΤΟΥΜΕ ΤΟΝ ΦΑΚΕΛΟ 'sockets' ΣΤΗ ΔΙΑΔΡΟΜΗ
     const DB_FILE = path.join(process.cwd(), 'purchases.db');
 
     // Διαγράψτε το αρχείο της βάσης δεδομένων αν υπάρχει, για να ξεκινήσετε από την αρχή με το νέο schema
