@@ -125,7 +125,7 @@
                 statusMessage.textContent = 'Successfully connected to game server!';
                 addMessage('Game server connection established.');
                 // Μόλις συνδεθούμε, μπορούμε να στείλουμε το token ξανά για να επιβεβαιώσει ο server την ταυτότητα
-                socket.send(JSON.stringify({ type: 'authenticate_token', token: authToken }));
+                // socket.send(JSON.stringify({ type: 'authenticate_token', token: authToken }));
             };
 
             socket.onmessage = (event) => {
