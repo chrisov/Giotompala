@@ -12,9 +12,9 @@
   
   /* Image fixed size on left */
   .image {
-	width: 100px;
-	height: 100px;
-	object-fit: contain;
+	width: 200px;
+	height: 200px;
+	object-fit: scale-down;
 	border-radius: 8px;
 	flex-shrink: 0;
   }
