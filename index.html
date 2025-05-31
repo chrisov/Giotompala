@@ -104,159 +104,148 @@
             <button onclick="closeAuthModal()" class="cancel">Cancel</button>
         </div>
     </div>
-
     <script>
-        const socket = new WebSocket(`ws://${window.location.host}`);
-        let currentAuthToken = null;
-        let currentUserInfo = null;
-        let productToBuy = null;
+    // === 1. Δυναμική δημιουργία WebSocket URL (για ws:// ή wss://) ===
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const socket = new WebSocket(`${wsProtocol}//${window.location.host}`);
 
-        const statusMessageDiv = document.getElementById('statusMessage');
-        const logoutButton = document.getElementById('logoutButton');
-        const authModal = document.getElementById('authModal');
-        const walletAddressInput = document.getElementById('walletAddressInput');
-        const modalMessageDiv = document.getElementById('modalMessage');
+    let productToBuy = null; // Αποθηκεύουμε το προϊόν που πάτησε ο χρήστης
 
-        // === WebSocket Event Handlers ===
-        socket.onopen = () => {
-            console.log('WebSocket connected.');
-            const storedToken = localStorage.getItem('authToken');
-            if (storedToken) {
-                socket.send(JSON.stringify({ type: 'verify_jwt', token: storedToken }));
-            }
-        };
+    const statusMessageDiv = document.getElementById('statusMessage');
+    // Οι μεταβλητές logoutButton, currentAuthToken, currentUserInfo δεν χρειάζονται πλέον
+    // αφού ο server δεν χρησιμοποιεί JWTs για την αγορά προϊόντων
+    const authModal = document.getElementById('authModal');
+    const walletAddressInput = document.getElementById('walletAddressInput');
+    const modalMessageDiv = document.getElementById('modalMessage');
 
-        socket.onmessage = (event) => {
-            const response = JSON.parse(event.data);
-            console.log('Message from server:', response);
+    // === WebSocket Event Handlers ===
+    socket.onopen = () => {
+        console.log('WebSocket connected.');
+        statusMessageDiv.textContent = 'Connected to Eshop backend.';
+        statusMessageDiv.style.color = 'green';
+        // Η λογική για verify_jwt αφαιρείται, καθώς ο server δεν το περιμένει πλέον
+    };
 
-            switch (response.status) {
-                case 'success': // Επιτυχής σύνδεση (από login_wallet)
-                    currentAuthToken = response.token;
-                    currentUserInfo = response.userInfo;
-                    localStorage.setItem('authToken', response.token);
-                    updateUIAfterLogin();
-                    modalMessageDiv.textContent = response.message;
-                    setTimeout(closeAuthModal, 1000);
-                    if (productToBuy) {
-                        sendBuyProductAction(productToBuy);
-                        productToBuy = null;
-                    }
-                    break;
-                case 'error': // Σφάλμα (π.χ., από login_wallet, buy_product)
-                    modalMessageDiv.textContent = response.message;
-                    statusMessageDiv.style.color = 'red';
-                    statusMessageDiv.textContent = response.message;
-                    break;
-                case 'product_bought': // Επιτυχής αγορά προϊόντος
-                    statusMessageDiv.style.color = 'green';
-                    statusMessageDiv.textContent = response.message;
-                    break;
-                case 'info': // Γενικά ενημερωτικά μηνύματα
-                    statusMessageDiv.style.color = 'blue';
-                    statusMessageDiv.textContent = response.message;
-                    break;
-            }
+    socket.onmessage = (event) => {
+        const response = JSON.parse(event.data);
+        console.log('Message from server:', response);
 
-            if (response.type === 'auth_success') {
-                currentAuthToken = response.token || localStorage.getItem('authToken');
-                currentUserInfo = response.userInfo;
-                updateUIAfterLogin();
-                statusMessageDiv.style.color = 'green';
-                statusMessageDiv.textContent = response.message;
-            } else if (response.type === 'auth_failed') {
-                console.warn('JWT verification failed, logging out.');
-                logoutUser();
-                modalMessageDiv.textContent = response.message;
-                statusMessageDiv.style.color = 'red';
-                statusMessageDiv.textContent = response.message;
-            }
-        };
+        // Ο server πλέον στέλνει status: 'success' ή 'error' για την record_purchase
+        if (response.status === 'success') {
+            modalMessageDiv.textContent = response.message;
+            statusMessageDiv.style.color = 'green';
+            statusMessageDiv.textContent = response.message;
+            setTimeout(closeAuthModal, 1500); // Κλείσιμο modal μετά από λίγο
+        } else if (response.status === 'error') {
+            modalMessageDiv.textContent = response.message;
+            statusMessageDiv.style.color = 'red';
+            statusMessageDiv.textContent = response.message;
+        } else {
+            console.log('Unhandled response status:', response.status);
+        }
+    };
 
-        socket.onclose = () => console.log('WebSocket disconnected.');
-        socket.onerror = (error) => console.error('WebSocket error:', error);
+    socket.onclose = () => {
+        console.log('WebSocket disconnected.');
+        statusMessageDiv.textContent = 'Disconnected from Eshop backend. Please refresh.';
+        statusMessageDiv.style.color = 'orange';
+    };
+    socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        statusMessageDiv.textContent = 'WebSocket error! Check console.';
+        statusMessageDiv.style.color = 'red';
+    };
 
-        // === UI Update Functions ===
-        function updateUIAfterLogin() {
-            if (currentUserInfo) {
-                statusMessageDiv.textContent = `Logged in as ${currentUserInfo.id} (Wallet: ${currentUserInfo.walletAddress}).`;
-                statusMessageDiv.style.color = 'green';
-                logoutButton.style.display = 'inline-block';
-            } else {
-                statusMessageDiv.textContent = 'Not logged in.';
-                statusMessageDiv.style.color = 'black';
-                logoutButton.style.display = 'none';
-            }
+    // === UI Update Functions (οι παλιές updateUIAfterLogin και logoutUser αφαιρούνται) ===
+    // Το logoutButton αφαιρείται ή κρύβεται εντελώς στο HTML αν δεν χρειάζεται
+
+    // === Modal Logic ===
+    function openAuthModal(productName) {
+        productToBuy = productName; // Αποθηκεύουμε το προϊόν που πάτησε ο χρήστης
+        authModal.style.display = 'flex'; // Χρησιμοποιούμε 'flex' για σωστό κεντράρισμα
+        walletAddressInput.value = ''; // Καθαρίζουμε προηγούμενο input
+        modalMessageDiv.textContent = ''; // Καθαρίζουμε προηγούμενα μηνύματα
+    }
+
+    function closeAuthModal() {
+        authModal.style.display = 'none';
+        productToBuy = null; // Καθαρίζουμε το product context
+    }
+
+    async function attemptWalletLogin() { // Made async for MetaMask integration
+        const walletAddress = walletAddressInput.value.trim();
+        if (!walletAddress) {
+            modalMessageDiv.textContent = 'Please enter your wallet address.';
+            return;
         }
 
-        function logoutUser() {
-            currentAuthToken = null;
-            currentUserInfo = null;
-            localStorage.removeItem('authToken');
-            updateUIAfterLogin();
-            alert('You have been logged out.');
-        }
-
-        // === Modal Logic ===
-        function openAuthModal(productName) {
-            productToBuy = productName;
-            authModal.style.display = 'flex';
-            walletAddressInput.value = '';
-            modalMessageDiv.textContent = '';
-        }
-
-        function closeAuthModal() {
-            authModal.style.display = 'none';
-            productToBuy = null;
-        }
-
-        function attemptWalletLogin() {
-            const walletAddress = walletAddressInput.value.trim();
-            if (walletAddress) {
-                socket.send(JSON.stringify({ type: 'login_wallet', address: walletAddress })); // Το type είναι login_wallet
-            } else {
-                modalMessageDiv.textContent = 'Please enter your wallet address.';
-            }
-        }
-
-        // === Product Buy Action ===
-        function handleProductClick(productName) {
-            if (currentAuthToken) {
-                sendBuyProductAction(productName);
-            } else {
-                openAuthModal(productName);
-            }
-        }
-
-        function sendBuyProductAction(productName) {
-            if (socket.readyState === WebSocket.OPEN && currentAuthToken) {
-                socket.send(JSON.stringify({
-                    type: 'buy_product',
-                    token: currentAuthToken,
-                    product: productName
-                }));
-            } else {
-                statusMessageDiv.style.color = 'orange';
-                statusMessageDiv.textContent = 'Please connect your wallet first.';
-                openAuthModal(productName);
-            }
-        }
-
-        // === Initial Load ===
-        const initialStoredToken = localStorage.getItem('authToken');
-        if (initialStoredToken) {
+        // === 2. Προσθήκη MetaMask Integration ===
+        if (typeof window.ethereum !== 'undefined') {
             try {
-                const decodedToken = JSON.parse(atob(initialStoredToken.split('.')[1]));
-                currentUserInfo = { id: decodedToken.id, role: decodedToken.role, walletAddress: decodedToken.walletAddress };
-                updateUIAfterLogin();
+                // Ζητάμε πρόσβαση στους λογαριασμούς του MetaMask
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const connectedAddress = accounts[0]; // Παίρνουμε τον πρώτο λογαριασμό
+
+                // Προαιρετικός έλεγχος: Αν ο χρήστης πληκτρολόγησε μια διεύθυνση,
+                // βεβαιωθείτε ότι ταιριάζει με αυτή του MetaMask
+                if (walletAddress && connectedAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+                    modalMessageDiv.textContent = 'MetaMask connected to a different address. Please use the entered address or connect the correct wallet.';
+                    return;
+                }
+
+                // Αν η σύνδεση έγινε επιτυχώς και η διεύθυνση ταιριάζει (ή δεν δόθηκε),
+                // στέλνουμε την αγορά στον server
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        type: 'record_purchase', // Ο server περιμένει τώρα 'record_purchase'
+                        walletAddress: connectedAddress,
+                        product: productToBuy,
+                        amount: 0.05 // ΠΡΟΣΟΧΗ: Αυτή η τιμή πρέπει να γίνει δυναμική ανά προϊόν
+                    }));
+                    modalMessageDiv.textContent = `Processing purchase for ${productToBuy} from ${connectedAddress}...`;
+                    statusMessageDiv.textContent = `Attempting to buy ${productToBuy}...`;
+                    statusMessageDiv.style.color = 'blue';
+                } else {
+                    modalMessageDiv.textContent = 'WebSocket not open. Please refresh.';
+                }
+
+            } catch (error) {
+                console.error("MetaMask connection error:", error);
+                modalMessageDiv.textContent = `MetaMask connection failed: ${error.message || error}.`;
+            }
+        } else {
+            // Fallback για χειροκίνητη εισαγωγή διεύθυνσης αν το MetaMask δεν είναι εγκατεστημένο
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: 'record_purchase', // Ο server περιμένει τώρα 'record_purchase'
+                    walletAddress: walletAddress,
+                    product: productToBuy,
+                    amount: 0.05 // ΠΡΟΣΟΧΗ: Αυτή η τιμή πρέπει να γίνει δυναμική ανά προϊόν
+                }));
+                modalMessageDiv.textContent = `Processing purchase for ${productToBuy} from ${walletAddress}...`;
+                statusMessageDiv.textContent = `Attempting to buy ${productToBuy}...`;
                 statusMessageDiv.style.color = 'blue';
-                statusMessageDiv.textContent = `Welcome back, ${currentUserInfo.id}! Checking connection...`;
-            } catch (e) {
-                console.error('Error decoding stored token:', e);
-                localStorage.removeItem('authToken');
+            } else {
+                modalMessageDiv.textContent = 'WebSocket not open. Please refresh.';
             }
         }
-        logoutButton.addEventListener('click', logoutUser);
-    </script>
+    }
+
+    // === Product Buy Action ===
+    function handleProductClick(productName) {
+        // Πάντα ανοίγουμε το modal για να ζητήσουμε το walletAddress
+        // και να ενεργοποιήσουμε το MetaMask flow.
+        openAuthModal(productName);
+    }
+
+    // === Initial Load ===
+    document.addEventListener('DOMContentLoaded', () => {
+        statusMessageDiv.textContent = 'Ready to connect and purchase.';
+        statusMessageDiv.style.color = 'black';
+        // Το κουμπί logoutButton δεν χρειάζεται πλέον στο Eshop flow
+        document.getElementById('logoutButton').style.display = 'none';
+        // Ο αρχικός έλεγχος token και το updateUIAfterLogin αφαιρούνται
+    });
+</script>
 </body>
 </html>
