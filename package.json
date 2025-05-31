@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "tsc && npm run copy-assets && npm run seed-db-build",
-    "dev": "ts-node src/server.ts",
+    "dev": "ts-node server.ts",
     "seed-db": "ts-node seed-db.ts",
     "seed-db-build": "node dist/seed-db.js",
     "copy-assets": "copyfiles index.html game.html seed.sql users.db dist",
