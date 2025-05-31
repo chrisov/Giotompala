@@ -9,6 +9,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*.ts", "*.ts"],
+  "include": ["server.ts", "seed-db.ts", "insert-users.ts"],
   "exclude": ["node_modules"]
 }
