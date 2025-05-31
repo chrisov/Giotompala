@@ -1,0 +1,7 @@
+.image {
+	width: 200px;      /* or any fixed width you want */
+	height: 200px;     /* fixed height or 'auto' to keep aspect ratio */
+	object-fit: contain;  /* or cover, depending on your needs */
+	border-radius: 8px; /* optional, for styling */
+  }
+  

@@ -1,0 +1,77 @@
+.card {
+	display: flex;
+	flex-wrap: wrap; /* Allows the discount bar below */
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	margin-bottom: 1rem;
+	position: relative;
+  }
+  
+  /* Image fixed size on left */
+  .image {
+	width: 100px;
+	height: 100px;
+	object-fit: contain;
+	border-radius: 8px;
+	flex-shrink: 0;
+  }
+  
+  /* Name centered horizontally (takes remaining space) */
+  .name {
+	flex: 1;
+	text-align: center;
+  }
+  
+  /* Right section with timer and buy button stacked vertically */
+  .rightSection {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.5rem;
+	min-width: 150px; /* fixed width so it doesn't shrink too much */
+  }
+  
+  /* Timer style */
+  .timer {
+	font-weight: 600;
+	font-size: 0.9rem;
+  }
+  
+  /* Buy button style */
+  .buyButton {
+	padding: 0.5rem 1rem;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+  }
+  
+  .buyButton:hover {
+	background-color: #0056b3;
+  }
+  
+  /* Full width discount bar container below all */
+  .discountBarContainer {
+	flex-basis: 100%; /* take full width */
+	margin-top: 0.75rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+  }
+  
+  /* Range slider fills most of width */
+  .discountSlider {
+	flex: 1;
+  }
+  
+  /* Percentage label */
+  .discountLabel {
+	min-width: 30px;
+	text-align: right;
+	font-weight: 600;
+  }
+  
