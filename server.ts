@@ -17,7 +17,7 @@ const PORT: number = parseInt(process.env.PORT || '3000', 10);
 const activeTokens = new Map<string, { id: string, role: string }>();
 
 // === Ρυθμίσεις Βάσης Δεδομένων ===
-const DB_FILE = path.join(__dirname, '..', 'users.db'); // Το αρχείο της βάσης δεδομένων
+const DB_FILE = path.join(__dirname, 'users.db'); // Το αρχείο της βάσης δεδομένων
 let db: any; // Μεταβλητή για την σύνδεση της βάσης δεδομένων
 
 async function initializeDatabase() {
@@ -47,10 +47,10 @@ initializeDatabase().catch(err => {
 
 
 // === HTTP ROUTES ===
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname)));
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/game.html', (req, res) => {
@@ -58,7 +58,7 @@ app.get('/game.html', (req, res) => {
 
     if (token && activeTokens.has(token)) {
         console.log(`User with token ${token} accessing game.html`);
-        res.sendFile(path.join(__dirname, '..', 'game.html'));
+        res.sendFile(path.join(__dirname, 'game.html'));
     } else {
         console.warn(`Unauthorized access attempt to game.html. Token: ${token}`);
         res.status(401).send('Unauthorized. Please log in first.');
