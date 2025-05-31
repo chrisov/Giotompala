@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "outDir": "./dist",
+    // ΚΑΝΕ ΣΧΟΛΙΟ Ή ΔΙΕΓΡΑΨΕ ΑΥΤΗ ΤΗ ΓΡΑΜΜΗ:
+    // "rootDir": "./src",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "server.ts",
+    "seed-db.ts",
+    "insert-transactions.ts"
+    // Αν έχεις άλλα αρχεία .ts στον root που θες να κάνει compile, πρόσθεσέ τα εδώ.
+    // Αν είχες το insert-users.ts και δεν το χρειάζεσαι πλέον, μην το βάλεις.
+  ]
+}
