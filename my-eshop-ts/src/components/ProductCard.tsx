@@ -9,13 +9,13 @@ type Props = {
 };
 
 const ProductCard: React.FC<Props> = ({ product, onBuyClick, onDiscountChange }) => {
-  const [timeLeft, setTimeLeft] = useState('00:00:00');
+  const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
 
   useEffect(() => {
     if (!product.dealEndsAt) return;
 
     const interval = setInterval(() => {
-      const total = product.dealEndsAt!.getTime() - new Date().getTime();
+      const total = product.dealEndsAt.getTime() - new Date().getTime();
       if (total <= 0) {
         setTimeLeft('00:00:00');
         clearInterval(interval);
@@ -26,7 +26,9 @@ const ProductCard: React.FC<Props> = ({ product, onBuyClick, onDiscountChange })
       const minutes = Math.floor((total / (1000 * 60)) % 60);
       const seconds = Math.floor((total / 1000) % 60);
 
-      setTimeLeft([hours, minutes, seconds].map(u => String(u).padStart(2, '0')).join(':'));
+      setTimeLeft(
+        [hours, minutes, seconds].map((unit) => String(unit).padStart(2, '0')).join(':')
+      );
     }, 1000);
 
     return () => clearInterval(interval);
@@ -34,38 +36,36 @@ const ProductCard: React.FC<Props> = ({ product, onBuyClick, onDiscountChange })
 
   return (
     <div className={styles.card}>
-      {/* Left: Image */}
       <img src={product.image} alt={product.name} className={styles.image} />
 
-      {/* Middle: Name */}
-      <div className={styles.name}>
-        <h3>{product.name}</h3>
-      </div>
+      <div className={styles.content}>
+        <div className={styles.topRow}>
+          <h3 className={styles.name}>{product.name}</h3>
+          {product.dealEndsAt && (
+            <div className={styles.timer}>
+              ⏳ {timeLeft}
+            </div>
+          )}
+        </div>
 
-      {/* Right: Timer and Buy button */}
-      <div className={styles.rightSection}>
-        {product.dealEndsAt && (
-          <div className={styles.timer}>
-            ⏳ Deal ends in: <strong>{timeLeft}</strong>
-          </div>
-        )}
+        <p className={styles.price}>${product.price.toFixed(2)}</p>
 
-        <button onClick={() => onBuyClick(product)} className={styles.buyButton}>
-          Buy
-        </button>
-      </div>
+        <label className={styles.discount}>
+          Discount: {product.discountPercent}%
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={product.discountPercent}
+            onChange={(e) => onDiscountChange(product.id, parseInt(e.target.value))}
+          />
+        </label>
 
-      {/* Full width discount bar */}
-      <div className={styles.discountBarContainer}>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={product.discountPercent}
-          onChange={(e) => onDiscountChange(product.id, parseInt(e.target.value))}
-          className={styles.discountSlider}
-        />
-        <span className={styles.discountLabel}>{product.discountPercent}%</span>
+        <div className={styles.buttonWrapper}>
+          <button onClick={() => onBuyClick(product)} className={styles.stakeButton}>
+            Stake
+          </button>
+        </div>
       </div>
     </div>
   );

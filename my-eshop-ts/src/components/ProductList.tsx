@@ -10,18 +10,19 @@ interface ProductListProps {
 }
 
 const ProductList: React.FC<ProductListProps> = ({ products, onBuyClick, onDiscountChange }) => {
-  return (
-    <div>
-      {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          onBuyClick={onBuyClick}
-          onDiscountChange={onDiscountChange}
-        />
-      ))}
-    </div>
-  );
-};
+	return (
+	  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+		{products.map((product) => (
+		  <ProductCard
+			key={product.id}
+			product={product}
+			onBuyClick={onBuyClick}
+			onDiscountChange={onDiscountChange}
+		  />
+		))}
+	  </div>
+	);
+  };
+  
 
 export default ProductList;
