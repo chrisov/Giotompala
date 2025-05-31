@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Dice Game Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; background-color: #f0f2f5; }
+        h1 { color: #333; margin-bottom: 30px; }
+        .role-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 15px auto;
+            max-width: 400px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        .role-section h2 {
+            margin-top: 0;
+            color: #555;
+            text-align: center;
+        }
+        .role-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .role-section input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .role-section button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .role-section button:hover {
+            background-color: #0056b3;
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 100px; /* Μικρότερο log για τη σελίδα login */
+            overflow-y: scroll;
+            margin: 20px auto;
+            max-width: 600px;
+            background-color: #fff;
+            text-align: left;
+        }
+        #messages p {
+            margin: 5px 0;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>** Welcome to dice game **</h1>
+
+    <div class="role-section">
+        <h2>Connect to play</h2>
+        <label for="playerInput">Player's address:</label>
+        <input type="text" id="playerInput" placeholder="Insert the address here">
+        <button onclick="loginAs('player')">Connect</button>
+    </div>
+
+    <div class="role-section">
+        <h2>Connect to bet</h2>
+        <label for="bettorInput">Bettor's address:</label>
+        <input type="text" id="bettorInput" placeholder="Insert the address here">
+        <button onclick="loginAs('bettor')">Connect</button>
+    </div>
+
+    <div id="messages"></div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const playerInput = document.getElementById('playerInput');
+        const bettorInput = document.getElementById('bettorInput');
+
+        const websocketUrl = `ws://${window.location.host}`;
+        const socket = new WebSocket(websocketUrl);
+
+        socket.onopen = (event) => {
+            addMessage('Συνδέθηκες στον server! Παρακαλώ συνδεθείτε ως Παίκτης ή Ποντάρισμα.');
+        };
+
+        socket.onmessage = (event) => {
+            console.log('Message from server:', event.data);
+            try {
+                const response = JSON.parse(event.data);
+                addMessage(`Server Response: ${response.message}`);
+
+                if (response.status === 'success' && response.token) {
+                    // Αποθήκευση του token και ανακατεύθυνση
+                    // Μπορείτε να χρησιμοποιήσετε sessionStorage ή localStorage
+                    // sessionStorage.setItem('authToken', response.token); // Καταργείται με το κλείσιμο του browser
+                    // localStorage.setItem('authToken', response.token); // Παραμένει
+                    
+                    // Κάνουμε ανακατεύθυνση με το token στο URL (για απλότητα)
+                    window.location.href = `/game.html?token=${response.token}`;
+                } else if (response.status === 'error') {
+                    // Ο server απάντησε με σφάλμα
+                    addMessage(`Login Failed: ${response.message}`);
+                }
+            } catch (e) {
+                // Αν το μήνυμα δεν είναι JSON
+                addMessage(`Server: ${event.data}`);
+            }
+        };
+
+        socket.onclose = (event) => {
+            console.log('Disconnected from WebSocket server', event);
+            addMessage('Αποσυνδέθηκες από τον server.');
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket Error:', error);
+            addMessage('Σφάλμα σύνδεσης WebSocket.');
+        };
+
+        function loginAs(role) {
+            let id;
+            let messageToSend;
+
+            if (role === 'player') {
+                id = playerInput.value.trim();
+                if (id === '') {
+                    alert('Παρακαλώ εισάγετε ένα όνομα ή ID παίκτη.');
+                    return;
+                }
+                messageToSend = JSON.stringify({ type: 'login', role: 'player', id: id });
+                addMessage(`Προσπάθεια σύνδεσης ως Παίκτης με ID: ${id}`);
+            } else if (role === 'bettor') {
+                id = bettorInput.value.trim();
+                if (id === '') {
+                    alert('Παρακαλώ εισάγετε ένα όνομα ή ID πονταρίσματος.');
+                    return;
+                }
+                messageToSend = JSON.stringify({ type: 'login', role: 'bettor', id: id });
+                addMessage(`Προσπάθεια σύνδεσης ως Ποντάρισμα με ID: ${id}`);
+            }
+
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(messageToSend);
+            } else {
+                addMessage('Η σύνδεση με τον server δεν είναι ανοιχτή. Δοκιμάστε ξανά.');
+                console.warn('WebSocket not open. Message not sent:', messageToSend);
+            }
+        }
+
+        function addMessage(msg) {
+            const p = document.createElement('p');
+            p.textContent = msg;
+            messagesDiv.appendChild(p);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>

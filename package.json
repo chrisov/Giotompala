@@ -1,0 +1,32 @@
+{
+  "name": "my-websocket-app-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "build": "tsc && npm run seed-db-build",
+    "dev": "ts-node src/server.ts",
+    "seed-db": "ts-node seed-db.ts",
+    "seed-db-build": "node dist/seed-db.js",
+    "insert-users": "ts-node insert-users.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.12",
+    "@types/sqlite3": "^3.1.11",
+    "@types/ws": "^8.5.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^4.19.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "ws": "^8.17.0"
+  }
+}

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Game</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; background-color: #e0f7fa; }
+        h1 { color: #00796b; margin-bottom: 20px; }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        #status-message {
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #game-area {
+            border: 1px solid #b2dfdb;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f0fdfc;
+            min-height: 200px;
+        }
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .controls button {
+            padding: 12px 25px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        .controls button:hover {
+            background-color: #45a049;
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 150px;
+            overflow-y: scroll;
+            margin-top: 20px;
+            background-color: #fff;
+        }
+        #messages p {
+            margin: 5px 0;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dice Game Board</h1>
+        <p id="status-message">Connecting to game server...</p>
+
+        <div id="game-area">
+            <p>Welcome to the game! Waiting for game updates...</p>
+        </div>
+
+        <div class="controls">
+            <button id="rollDiceBtn" onclick="sendGameAction('roll_dice')">Roll Dice</button>
+            <button id="placeBetBtn" onclick="sendGameAction('place_bet')">Place Bet</button>
+        </div>
+
+        <h3>Game Log:</h3>
+        <div id="messages"></div>
+    </div>
+
+    <script>
+        const statusMessage = document.getElementById('status-message');
+        const messagesDiv = document.getElementById('messages');
+        const rollDiceBtn = document.getElementById('rollDiceBtn');
+        const placeBetBtn = document.getElementById('placeBetBtn');
+
+        let socket;
+        let authToken = null;
+        let userId = null;
+        let userRole = null;
+
+        // Συνάρτηση για να πάρουμε το token από το URL
+        function getParameterByName(name, url = window.location.href) {
+            name = name.replace(/[\[\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        // Έλεγχος token κατά την φόρτωση της σελίδας
+        window.onload = () => {
+            authToken = getParameterByName('token');
+
+            if (!authToken) {
+                statusMessage.textContent = 'Error: No authentication token found. Redirecting to login...';
+                setTimeout(() => {
+                    window.location.href = '/'; // Ανακατεύθυνση στην αρχική σελίδα
+                }, 2000);
+                return;
+            }
+
+            statusMessage.textContent = `Authenticated with token. Connecting to game server...`;
+            connectWebSocket();
+        };
+
+        function connectWebSocket() {
+            // Συνδεόμαστε στον WebSocket server, περνώντας το token ως query parameter αν χρειαστεί
+            // Αν και ο server το έχει ήδη αποθηκεύσει, μπορεί να χρησιμοποιηθεί για επαλήθευση εκ νέου
+            const websocketUrl = `ws://${window.location.host}?token=${authToken}`;
+            socket = new WebSocket(websocketUrl);
+
+            socket.onopen = (event) => {
+                statusMessage.textContent = 'Successfully connected to game server!';
+                addMessage('Game server connection established.');
+                // Μόλις συνδεθούμε, μπορούμε να στείλουμε το token ξανά για να επιβεβαιώσει ο server την ταυτότητα
+                socket.send(JSON.stringify({ type: 'authenticate_token', token: authToken }));
+            };
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                addMessage(`Server: ${data.message || JSON.stringify(data)}`);
+                // Εδώ θα χειριζόμαστε τα μηνύματα του παιχνιδιού (π.χ. αποτελέσματα ζαριών, updates πονταρίσματος)
+                if (data.type === 'auth_success') {
+                    userId = data.id;
+                    userRole = data.role;
+                    statusMessage.textContent = `Logged in as ${userRole}: ${userId}. Ready to play!`;
+                    // Ενεργοποίηση κουμπιών ανάλογα με τον ρόλο
+                    if (userRole === 'player') {
+                        rollDiceBtn.disabled = false;
+                        placeBetBtn.disabled = true;
+                    } else if (userRole === 'bettor') {
+                        rollDiceBtn.disabled = true;
+                        placeBetBtn.disabled = false;
+                    }
+                }
+                // <--- ΑΥΤΟ ΤΟ BLOCK ΧΡΕΙΑΖΕΤΑΙ ΤΗΝ ΑΛΛΑΓΗ
+                else if (data.type === 'auth_failed') {
+                    statusMessage.textContent = `Authentication failed: ${data.message}. Redirecting...`;
+                    // Προσθέτουμε τον έλεγχο για το redirect property
+                    if (data.redirect) { //
+                        setTimeout(() => { //
+                            window.location.href = data.redirect; //
+                        }, 5000); // Ανακατεύθυνση μετά από 2 δευτερόλεπτα
+                    } else { //
+                        // Αν δεν υπάρχει redirect property, απλά ενημερώνουμε το status message
+                        statusMessage.textContent = `Authentication failed: ${data.message}.`; //
+                    }
+                }
+                // ---> ΤΕΛΟΣ ΑΛΛΑΓΗΣ
+                // Προσθέστε logic για άλλα μηνύματα παιχνιδιού
+                // ... (λοιπός κώδικας)
+            };
+
+            socket.onclose = (event) => {
+                statusMessage.textContent = 'Disconnected from game server.';
+                addMessage('Disconnected from game server. Please refresh or login again.');
+                console.log('Disconnected from WebSocket server', event);
+            };
+
+            socket.onerror = (error) => {
+                statusMessage.textContent = 'WebSocket error. Check console.';
+                addMessage('WebSocket Error. Check console.');
+                console.error('WebSocket Error:', error);
+            };
+        }
+
+        // Συνάρτηση για αποστολή ενεργειών παιχνιδιού
+        function sendGameAction(actionType) {
+            if (socket.readyState === WebSocket.OPEN) {
+                const message = JSON.stringify({ type: 'game_action', action: actionType, token: authToken });
+                socket.send(message);
+                addMessage(`Sending action: ${actionType}`);
+            } else {
+                addMessage('Not connected to server. Cannot send action.');
+            }
+        }
+
+        function addMessage(msg) {
+            const p = document.createElement('p');
+            p.textContent = msg;
+            messagesDiv.appendChild(p);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
