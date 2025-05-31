@@ -12,7 +12,8 @@
   },
   "include": [
     "server.ts",
-    "seed-db.ts"
+    "seed-db.ts",
+    "insert-transactions.ts"
     // Αν έχεις άλλα αρχεία .ts στον root που θες να κάνει compile, πρόσθεσέ τα εδώ.
     // Αν είχες το insert-users.ts και δεν το χρειάζεσαι πλέον, μην το βάλεις.
   ]

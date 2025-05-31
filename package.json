@@ -10,7 +10,7 @@
     "seed-db": "ts-node seed-db.ts",
     "seed-db-build": "node dist/seed-db.js",
     "copy-assets": "copyfiles index.html game.html seed.sql users.db dist",
-    "insert-users": "ts-node insert-users.ts"
+    "insert-transactions": "node dist/insert-transactions.js"
   },
   "keywords": [],
   "author": "",
