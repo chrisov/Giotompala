@@ -84,12 +84,13 @@ const App: React.FC = () => {
 
   // Effect για τη σύνδεση του WebSocket
   useEffect(() => {
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     // ΣΗΜΑΝΤΙΚΟ: Κατά το development, το React app τρέχει σε διαφορετικό port (π.χ. 5173).
     // Ο server σου τρέχει στο 10000. Πρέπει να συνδεθείς απευθείας σε αυτό το port.
     // const backendPort = 10000; // Βεβαιώσου ότι είναι το ίδιο με το server.ts
     // Χρησιμοποιούμε τη μεταβλητή περιβάλλοντος
-    const backendUrl = import.meta.env.VITE_WEBSOCKET_URL || `<span class="math-inline">\{wsProtocol\}//</span>{window.location.hostname}:10000`;
+    const backendUrl =
+  import.meta.env.VITE_WEBSOCKET_URL || // Αν υπάρχει VITE_WEBSOCKET_URL (για live), χρησιμοποιείται αυτό
+  (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + `//${window.location.hostname}:10000`; // Αλλιώς, υπολογίζεται local URL
 
     const newSocket = new WebSocket(backendUrl);
     
