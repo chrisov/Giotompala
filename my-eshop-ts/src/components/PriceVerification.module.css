@@ -1,0 +1,315 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid #f0f0f0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px 20px 0 0;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.content {
+  padding: 2rem;
+}
+
+.productInfo {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.productInfo h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.usdPrice {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #28a745;
+  margin: 0;
+}
+
+.verifying {
+  text-align: center;
+  padding: 2rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.verifying p {
+  font-weight: 600;
+  color: #333;
+  margin: 0.5rem 0;
+}
+
+.verifying small {
+  color: #666;
+}
+
+.success {
+  text-align: center;
+}
+
+.priceComparison {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.75rem 0;
+  font-size: 1rem;
+}
+
+.price {
+  font-weight: bold;
+  color: #333;
+}
+
+.cryptoPrice {
+  font-weight: bold;
+  color: #667eea;
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+}
+
+.verification {
+  padding: 1rem;
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.checkmark {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.verification p {
+  margin: 0.5rem 0;
+  color: #155724;
+}
+
+.verification small {
+  color: #155724;
+  opacity: 0.8;
+}
+
+.transaction {
+  background: #e7f3ff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.transaction p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #0066cc;
+}
+
+.txHash {
+  font-family: 'Courier New', monospace;
+  background: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  color: #333;
+  display: block;
+  word-break: break-all;
+}
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  background: #f8d7da;
+  border-radius: 10px;
+  color: #721c24;
+}
+
+.errorIcon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.error p {
+  margin: 0.5rem 0;
+}
+
+.error small {
+  opacity: 0.8;
+}
+
+.actions {
+  padding: 1.5rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.confirmButton {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  flex: 1;
+  max-width: 250px;
+}
+
+.confirmButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+.retryButton {
+  background: linear-gradient(135deg, #ffc107, #fd7e14);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  flex: 1;
+  max-width: 200px;
+}
+
+.retryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+}
+
+.cancelButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex: 0 0 auto;
+}
+
+.cancelButton:hover {
+  background: #5a6268;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modal {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .content {
+    padding: 1.5rem;
+  }
+  
+  .actions {
+    flex-direction: column;
+  }
+  
+  .confirmButton,
+  .retryButton {
+    max-width: none;
+  }
+  
+  .priceRow {
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
+}

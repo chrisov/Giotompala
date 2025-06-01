@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { Product } from '../types/Product';
 import styles from './ProductCard.module.css';
 import { usePythPrices } from '../hooks/usePythPrices';
+import PriceVerification from './PriceVerification';
 
 type Props = {
   product: Product;
@@ -12,6 +13,7 @@ type Props = {
 const ProductCard: React.FC<Props> = ({ product, onBuyClick, onDiscountChange }) => {
   const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
   const [showCryptoPrice, setShowCryptoPrice] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
   const { prices } = usePythPrices(['ETH/USD'], { autoRefresh: true, refreshInterval: 30000 });
 
   useEffect(() => {
@@ -89,10 +91,28 @@ const ProductCard: React.FC<Props> = ({ product, onBuyClick, onDiscountChange })
 
         <div className={styles.buttonWrapper}>
           <button onClick={() => onBuyClick(product)} className={styles.stakeButton}>
-            Stake
+            Buy Now
+          </button>
+          <button 
+            onClick={() => setShowVerification(true)} 
+            className={styles.verifyButton}
+            title="Verify price with blockchain oracle"
+          >
+            🔒 Verify Price
           </button>
         </div>
       </div>
+
+      <PriceVerification
+        isVisible={showVerification}
+        onClose={() => setShowVerification(false)}
+        productPrice={product.price}
+        productName={product.name}
+        onConfirm={(verifiedPrice) => {
+          console.log('Price verified:', verifiedPrice, 'ETH');
+          // Hier könnte die echte Krypto-Zahlung initiiert werden
+        }}
+      />
     </div>
   );
 };

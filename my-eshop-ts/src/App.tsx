@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import ProductList from './components/ProductList';
+import PythOracle from './components/PythOracle';
 // import BuyModal from './components/BuyModal'; // Το BuyModal δεν χρειάζεται πλέον, καθώς η λογική αγοράς μεταφέρεται στο AuthModal
 import type { Product } from './types/Product';
-import styles from './App.module.css'; // Διατηρούμε τα styles αν χρησιμοποιούνται
 
 // Εικόνες προϊόντων
 import headphonesImg from './assets/headphones.jpg';
@@ -69,6 +69,12 @@ const dummyProducts: Product[] = [
 ];
 
 const App: React.FC = () => {
+  // Developer mode - only show Oracle tab in development
+  const isDeveloperMode = import.meta.env.DEV && window.location.search.includes('dev=true');
+  
+  // Navigation state
+  const [currentPage, setCurrentPage] = useState<'shop' | 'oracle'>('shop');
+
   // State από το αρχικό App.tsx
   const [products, setProducts] = useState<Product[]>(dummyProducts);
   const [searchQuery, setSearchQuery] = useState('');
@@ -230,33 +236,82 @@ const App: React.FC = () => {
       }}
     >
       <Header onSearch={setSearchQuery} onRegisterClick={handleRegisterClick} />
+      
+      {/* Navigation - only show Oracle tab in developer mode */}
+      {isDeveloperMode && (
+        <nav style={{
+          backgroundColor: '#f8f9fa',
+          padding: '1rem 2rem',
+          borderBottom: '1px solid #dee2e6',
+          display: 'flex',
+          gap: '1rem'
+        }}>
+          <button
+            onClick={() => setCurrentPage('shop')}
+            style={{
+              padding: '0.5rem 1rem',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              backgroundColor: currentPage === 'shop' ? '#007bff' : '#6c757d',
+              color: 'white',
+              fontWeight: 'bold'
+            }}
+          >
+            🛒 E-Shop
+          </button>
+          <button
+            onClick={() => setCurrentPage('oracle')}
+            style={{
+              padding: '0.5rem 1rem',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              backgroundColor: currentPage === 'oracle' ? '#007bff' : '#6c757d',
+              color: 'white',
+              fontWeight: 'bold'
+            }}
+          >
+            🐍 Pyth Oracle (Dev)
+          </button>
+          <div style={{ fontSize: '0.8rem', color: '#6c757d', alignSelf: 'center' }}>
+            Developer Mode Active
+          </div>
+        </nav>
+      )}
+
       <main
         style={{
           flex: 1,
-          padding: '1rem 2rem',
           overflowY: 'auto',
         }}
       >
-        {/* Status Message Display */}
-        <div 
-            id="statusMessage" 
-            style={{ 
-                padding: '10px', 
-                backgroundColor: '#e0e0e0', 
-                marginBottom: '20px', 
-                textAlign: 'center',
-                borderRadius: '8px',
-                display: statusMessage ? 'block' : 'none' // Εμφάνιση μόνο αν υπάρχει μήνυμα
-            }}
-        >
-            {statusMessage}
-        </div>
+        {currentPage === 'shop' ? (
+          <div style={{ padding: '1rem 2rem' }}>
+            {/* Status Message Display */}
+            <div 
+                id="statusMessage" 
+                style={{ 
+                    padding: '10px', 
+                    backgroundColor: '#e0e0e0', 
+                    marginBottom: '20px', 
+                    textAlign: 'center',
+                    borderRadius: '8px',
+                    display: statusMessage ? 'block' : 'none' // Εμφάνιση μόνο αν υπάρχει μήνυμα
+                }}
+            >
+                {statusMessage}
+            </div>
 
-        <ProductList
-          products={filteredProducts}
-          onBuyClick={handleBuyClick} // Τώρα καλεί το handleBuyClick που ανοίγει το AuthModal
-          onDiscountChange={handleDiscountChange}
-        />
+            <ProductList
+              products={filteredProducts}
+              onBuyClick={handleBuyClick} // Τώρα καλεί το handleBuyClick που ανοίγει το AuthModal
+              onDiscountChange={handleDiscountChange}
+            />
+          </div>
+        ) : (
+          isDeveloperMode && <PythOracle />
+        )}
       </main>
 
       {/* Authentication Modal - Ενσωματωμένο JSX */}
