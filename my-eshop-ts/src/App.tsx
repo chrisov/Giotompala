@@ -3,7 +3,8 @@ import Header from './components/Header';
 import ProductList from './components/ProductList';
 // import BuyModal from './components/BuyModal'; // Το BuyModal δεν χρειάζεται πλέον, καθώς η λογική αγοράς μεταφέρεται στο AuthModal
 import type { Product } from './types/Product';
-import styles from './App.module.css'; // Διατηρούμε τα styles αν χρησιμοποιούνται
+import './App.module.css'; // Διατηρούμε τα styles αν χρησιμοποιούνται
+// import styles from './App.module.css'; // Διατηρούμε τα styles αν χρησιμοποιούνται
 
 // Εικόνες προϊόντων
 import headphonesImg from './assets/headphones.jpg';

@@ -4,9 +4,7 @@ import path from 'path';
 import { unlink } from 'fs/promises';
 
 async function seedDatabase() {
-    // Αλλάζουμε το όνομα του αρχείου της βάσης δεδομένων σε purchases.db
-    // ΧΡΗΣΙΜΟΠΟΙΟΥΜΕ process.cwd() ΓΙΑ ΣΥΝΕΠΕΙΑ ΜΕ ΤΑ ΑΛΛΑ SCRIPTS
-    // ΕΔΩ ΠΡΟΣΘΕΤΟΥΜΕ ΤΟΝ ΦΑΚΕΛΟ 'sockets' ΣΤΗ ΔΙΑΔΡΟΜΗ
+    // Η διαδρομή είναι σωστή για το server.ts και τα άλλα scripts
     const DB_FILE = path.join(process.cwd(), 'purchases.db');
 
     // Διαγράψτε το αρχείο της βάσης δεδομένων αν υπάρχει, για να ξεκινήσετε από την αρχή με το νέο schema
@@ -26,13 +24,14 @@ async function seedDatabase() {
     });
 
     // Δημιουργία νέου πίνακα "transactions"
+    // === ΕΔΩ ΕΙΝΑΙ Η ΔΙΟΡΘΩΣΗ: ΑΛΛΑΖΟΥΜΕ ΤΑ ΟΝΟΜΑ ΣΤΗΛΩΝ ===
     await db.exec(`
         CREATE TABLE transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            wallet_address TEXT NOT NULL,
+            walletAddress TEXT NOT NULL,       
             product TEXT NOT NULL,
-            ethereum_amount REAL NOT NULL, -- ΣΩΣΤΟ: ethereum_amount
-            timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+            amount REAL NOT NULL,              
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         );
     `);
     console.log('Database initialized with "transactions" table.');

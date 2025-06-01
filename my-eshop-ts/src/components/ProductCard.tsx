@@ -12,10 +12,16 @@ const ProductCard: React.FC<Props> = ({ product, onBuyClick, onDiscountChange })
   const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
 
   useEffect(() => {
-    if (!product.dealEndsAt) return;
+    // Δημιουργούμε μια τοπική μεταβλητή για το dealEndsAt
+    const dealEndTime = product.dealEndsAt;
+
+    if (!dealEndTime) { // Ελέγχουμε αυτή την τοπική μεταβλητή
+      return;
+    }
 
     const interval = setInterval(() => {
-      const total = product.dealEndsAt.getTime() - new Date().getTime();
+      // Τώρα, μέσα σε αυτό το block, ο TypeScript ξέρει ότι το dealEndTime είναι τύπου Date
+      const total = dealEndTime.getTime() - new Date().getTime();
       if (total <= 0) {
         setTimeLeft('00:00:00');
         clearInterval(interval);
@@ -32,7 +38,7 @@ const ProductCard: React.FC<Props> = ({ product, onBuyClick, onDiscountChange })
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [product.dealEndsAt]);
+  }, [product.dealEndsAt]); // Εξακολουθείς να βάζεις το product.dealEndsAt στο dependency array
 
   return (
     <div className={styles.card}>
