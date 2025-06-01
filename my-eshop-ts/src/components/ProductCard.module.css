@@ -39,12 +39,23 @@
 	color: #e63946;
   }
   
-  .price {
-	font-size: 1rem;
+  .priceSection {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
 	margin: 0.5rem 0;
-  }
-  
-  .discount {
+}
+
+.price {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 1.25rem;
+	font-weight: bold;
+	color: #2563eb;
+}
+
+.discount {
 	margin: 0.5rem 0;
   }
   
@@ -70,4 +81,45 @@
   .stakeButton:hover {
 	background-color: #005bb5;
   }
-  
+
+.cryptoToggle {
+	background: linear-gradient(45deg, #ffd700, #ffed4e);
+	border: none;
+	border-radius: 50%;
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	font-size: 0.8rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.cryptoToggle:hover {
+	transform: scale(1.1);
+	box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.cryptoPrice {
+	font-size: 0.9rem;
+	color: #667eea;
+	font-weight: 600;
+	margin: 0;
+	padding: 0.25rem 0.5rem;
+	background: rgba(102, 126, 234, 0.1);
+	border-radius: 6px;
+	border-left: 3px solid #667eea;
+	animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
