@@ -55,23 +55,6 @@ initializeDatabase().catch(err => {
     process.exit(1);
 });
 
-// === HTTP ROUTES ===
-
-// Εξυπηρέτηση των στατικών αρχείων του React frontend (για PRODUCTION)
-// Το React frontend build-άρεται στον φάκελο `my-eshop-ts/dist`
-// Από το server.js (που είναι στο sockets/dist), πρέπει να πάμε:
-// sockets/dist -> sockets -> FrontEnd -> my-eshop-ts -> dist
-const frontendBuildPath = path.join(__dirname, '..', '..', 'my-eshop-ts', 'dist');
-// console.log(`Serving static frontend files from: ${frontendBuildPath}`);
-// app.use(express.static(frontendBuildPath));
-
-// Εξυπηρέτηση του index.html για όλες τις διαδρομές που δεν είναι API (για PRODUCTION)
-// Αυτό είναι σημαντικό για τα single-page applications (React router)
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join(frontendBuildPath, 'index.html'));
-// });
-
-
 // === WEBSOCKET LOGIC ===
 // (Ο κώδικας του WebSocket παραμένει ίδιος - είναι μια χαρά)
 wss.on('connection', (ws: WebSocket) => {
