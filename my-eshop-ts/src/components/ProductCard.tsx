@@ -1,26 +1,44 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react'; // Πρόσθεσα το useMemo
 import type { Product } from '../types/Product';
 import styles from './ProductCard.module.css';
+import { usePythPrices } from '../hooks/usePythPrices';
 
 type Props = {
   product: Product;
   onBuyClick: (product: Product) => void;
-  onDiscountChange: (id: number, newDiscount: number) => void;
+  // Το onDiscountChange είναι στα props αλλά δεν χρησιμοποιείται μέσα στο ProductCard.
+  // Αν δεν χρειάζεται, μπορείς να το αφαιρέσεις από τα Props.
+  // onDiscountChange: (id: number, newDiscount: number) => void; 
 };
 
-const ProductCard: React.FC<Props> = ({ product, onBuyClick, onDiscountChange }) => {
+const ProductCard: React.FC<Props> = ({ product, onBuyClick }) => { // Αφαίρεσα το onDiscountChange από τα destructuring props
   const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
+  const [showCryptoPrice, setShowCryptoPrice] = useState(false);
+  // Φέρνουμε την τιμή του ETH/USD από το Pyth Network
+  const { prices } = usePythPrices(['ETH/USD'], { autoRefresh: true, refreshInterval: 30000 });
+
+  // Υπολογίζουμε την τιμή σε ETH μόνο όταν αλλάζει η τιμή του προϊόντος ή η τιμή του ETH/USD
+  const productPriceInEth = useMemo(() => {
+    const ethPriceUsd = prices['ETH/USD']?.price; // Παίρνουμε την τιμή του ETH σε USD από το Pyth
+    
+    if (!ethPriceUsd || ethPriceUsd === 0) {
+      return null; // Δεν μπορούμε να υπολογίσουμε αν δεν υπάρχει τιμή ETH/USD
+    }
+
+    const discountedPriceUsd = product.price * (1 - (product.discountPercent || 0) / 100);
+    const priceInEth = discountedPriceUsd / ethPriceUsd;
+    return priceInEth.toFixed(6); // Επιστρέφουμε την τιμή σε 6 δεκαδικά ψηφία ως string
+  }, [product.price, product.discountPercent, prices]); // Εξαρτήσεις: τιμή προϊόντος, έκπτωση, και Pyth τιμές
+
 
   useEffect(() => {
-    // Δημιουργούμε μια τοπική μεταβλητή για το dealEndsAt
     const dealEndTime = product.dealEndsAt;
 
-    if (!dealEndTime) { // Ελέγχουμε αυτή την τοπική μεταβλητή
+    if (!dealEndTime) {
       return;
     }
 
     const interval = setInterval(() => {
-      // Τώρα, μέσα σε αυτό το block, ο TypeScript ξέρει ότι το dealEndTime είναι τύπου Date
       const total = dealEndTime.getTime() - new Date().getTime();
       if (total <= 0) {
         setTimeLeft('00:00:00');
@@ -38,7 +56,7 @@ const ProductCard: React.FC<Props> = ({ product, onBuyClick, onDiscountChange })
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [product.dealEndsAt]); // Εξακολουθείς να βάζεις το product.dealEndsAt στο dependency array
+  }, [product.dealEndsAt]);
 
   return (
     <div className={styles.card}>
@@ -54,18 +72,36 @@ const ProductCard: React.FC<Props> = ({ product, onBuyClick, onDiscountChange })
           )}
         </div>
 
-        <p className={styles.price}>${product.price.toFixed(2)}</p>
+        <div className={styles.priceSection}>
+          <p className={styles.price}>
+            ${(product.price * (1 - (product.discountPercent || 0) / 100)).toFixed(2)} {/* Υπολογίζουμε εδώ την εκπτωτική τιμή */}
+            {productPriceInEth && ( // Τώρα το productPriceInEth είναι ορισμένο
+              <button
+                className={styles.cryptoToggle}
+                onClick={() => setShowCryptoPrice(!showCryptoPrice)}
+              >
+                💰
+              </button>
+            )}
+          </p>
+          {showCryptoPrice && productPriceInEth && (
+            <p className={styles.cryptoPrice}>
+              ≈ {productPriceInEth} ETH
+            </p>
+          )}
+        </div>
 
-        <label className={styles.discount}>
-          Discount: {product.discountPercent}%
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={product.discountPercent}
-            onChange={(e) => onDiscountChange(product.id, parseInt(e.target.value))}
-          />
-        </label>
+        <div className={styles.progressContainer}>
+          <label className={styles.progressLabel}>
+            {product.purchasePercent ?? 0}% of stock purchased
+          </label>
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              style={{ width: `${product.purchasePercent ?? 0}%` }}
+            ></div>
+          </div>
+        </div>
 
         <div className={styles.buttonWrapper}>
           <button onClick={() => onBuyClick(product)} className={styles.stakeButton}>

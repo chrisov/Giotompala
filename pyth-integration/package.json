@@ -1,0 +1,21 @@
+{
+  "name": "pyth-integration",
+  "version": "1.0.0",
+  "description": "Pyth Oracle Integration - All 4 Steps",
+  "main": "src/simple-test.js",
+  "scripts": {
+    "test": "node src/simple-test.js",
+    "basic": "node src/full-integration.js", 
+    "complete": "node src/complete-integration.js",
+    "fixed": "node src/fixed-complete-integration.js",
+    "balance": "node src/check-balance.js",
+    "poolbuy": "node src/poolbuy.js",
+    "debug": "node src/debug-pyth.js"
+  },
+  "dependencies": {
+    "@pythnetwork/hermes-client": "^1.0.0",
+    "@pythnetwork/pyth-sdk-js": "^1.0.0",
+    "ethers": "^6.0.0",
+    "dotenv": "^16.0.0"
+  }
+}

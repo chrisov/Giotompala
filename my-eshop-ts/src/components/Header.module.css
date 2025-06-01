@@ -3,34 +3,74 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: 1rem 2rem;
-	background-color: #f8f8f8;
-	box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  }
-  
-  .logo {
+	background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+	box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+	position: relative;
+	z-index: 10;
+}
+
+.logo {
 	font-weight: bold;
 	font-size: 1.5rem;
-  }
-  
-  .search {
+	background: linear-gradient(45deg, #667eea, #764ba2);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+.search {
 	flex-grow: 1;
 	margin: 0 1rem;
 	padding: 0.5rem 1rem;
 	font-size: 1rem;
 	border-radius: 0.25rem;
 	border: 1px solid #ccc;
-  }
-  
-  .registerBtn {
+}
+
+.registerBtn {
 	background-color: #2563eb;
 	color: white;
 	border: none;
 	padding: 0.6rem 1.2rem;
 	border-radius: 0.25rem;
 	cursor: pointer;
-  }
-  
-  .registerBtn:hover {
+}
+
+.registerBtn:hover {
 	background-color: #1d4ed8;
-  }
-  
+}
+
+.priceSection {
+	background: rgba(255, 255, 255, 0.95);
+	backdrop-filter: blur(10px);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	padding: 0.5rem 2rem;
+	position: relative;
+	z-index: 9;
+}
+
+.headerPrices {
+	margin: 0;
+	background: transparent;
+	padding: 0;
+	box-shadow: none;
+	border: none;
+}
+
+@media (max-width: 768px) {
+	.header {
+		padding: 1rem;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	
+	.search {
+		margin: 0;
+		order: 3;
+		width: 100%;
+	}
+	
+	.priceSection {
+		padding: 0.5rem 1rem;
+	}
+}
