@@ -6,18 +6,26 @@ import path from 'path';
 import os from 'os';
 import { open } from 'sqlite';
 import sqlite3 from 'sqlite3';
+import cors from 'cors'; // Πρόσθεσε αυτή τη γραμμή για CORS
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-// Προσοχή: Εδώ ορίζουμε την PORT. Στο Render θα οριστεί από το περιβάλλον.
-// Καλό είναι να χρησιμοποιείτε process.env.PORT || 10000 (ή όποια θύρα θέλετε).
-const PORT: number = parseInt(process.env.PORT || '10000', 10); 
+// Πρόσθεσε CORS για να επιτρέψεις στο React frontend να επικοινωνεί κατά το development
+// Όταν το frontend και το backend είναι σε διαφορετικά ports, το CORS είναι απαραίτητο.
+// Για production, μπορείς να το κάνεις πιο αυστηρό ή να το αφαιρέσεις αν εξυπηρετούνται από τον ίδιο server.
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173', // Επιτρέψουμε το Vite dev server
+    methods: ['GET', 'POST'],
+    credentials: true,
+}));
+
+const PORT: number = parseInt(process.env.PORT || '10000', 10);
 
 // === Ρυθμίσεις Βάσης Δεδομένων ===
-// Αλλάζουμε το αρχείο της βάσης δεδομένων σε purchases.db
-const DB_FILE = path.join(__dirname, 'purchases.db');
+// Αυτή η διαδρομή είναι σωστή για τη δομή σου
+const DB_FILE = path.join(__dirname, '..', 'purchases.db');
 let db: any;
 
 async function initializeDatabase() {
@@ -26,8 +34,6 @@ async function initializeDatabase() {
             filename: DB_FILE,
             driver: sqlite3.Database
         });
-
-        // Δημιουργία πίνακα 'transactions' αν δεν υπάρχει
         await db.exec(`
             CREATE TABLE IF NOT EXISTS transactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,33 +43,37 @@ async function initializeDatabase() {
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        // Νέο μήνυμα για επιβεβαίωση της σωστής βάσης/πίνακα
         console.log('Database initialized and "transactions" table ensured.');
-
     } catch (err) {
         console.error('Failed to initialize database:', err);
         process.exit(1);
     }
 }
 
-// Κλήση αρχικοποίησης της βάσης δεδομένων
 initializeDatabase().catch(err => {
     console.error('Failed to initialize database:', err);
     process.exit(1);
 });
 
 // === HTTP ROUTES ===
-// Εξυπηρέτηση στατικών αρχείων (index.html, CSS, JS)
-app.use(express.static(path.join(__dirname)));
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+// Εξυπηρέτηση των στατικών αρχείων του React frontend (για PRODUCTION)
+// Το React frontend build-άρεται στον φάκελο `my-eshop-ts/dist`
+// Από το server.js (που είναι στο sockets/dist), πρέπει να πάμε:
+// sockets/dist -> sockets -> FrontEnd -> my-eshop-ts -> dist
+const frontendBuildPath = path.join(__dirname, '..', '..', 'my-eshop-ts', 'dist');
+console.log(`Serving static frontend files from: ${frontendBuildPath}`);
+app.use(express.static(frontendBuildPath));
+
+// Εξυπηρέτηση του index.html για όλες τις διαδρομές που δεν είναι API (για PRODUCTION)
+// Αυτό είναι σημαντικό για τα single-page applications (React router)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
 });
 
-// Δεν χρειάζεται πλέον το /game.html, ούτε η λογική token/activeTokens
-// Το eshop είναι πλέον στο index.html.
 
 // === WEBSOCKET LOGIC ===
+// (Ο κώδικας του WebSocket παραμένει ίδιος - είναι μια χαρά)
 wss.on('connection', (ws: WebSocket) => {
     console.log('Client connected via WebSocket');
 
@@ -79,17 +89,17 @@ wss.on('connection', (ws: WebSocket) => {
             return;
         }
 
-        // Νέα λογική για καταγραφή αγοράς
         if (parsedMessage.type === 'record_purchase') {
             const { walletAddress, product, amount } = parsedMessage;
 
-            if (!walletAddress || !product || !amount) {
+            // Σημείωση: Η συνθήκη !amount θα ήταν true αν το amount ήταν 0.
+            // Αν το 0 είναι έγκυρη τιμή, θα πρέπει να ελέγξεις αν είναι undefined ή null.
+            if (!walletAddress || !product || amount === undefined || amount === null) {
                 ws.send(JSON.stringify({ status: 'error', message: 'Λείπουν δεδομένα για την αγορά (walletAddress, product, ή amount).' }));
                 return;
             }
 
             try {
-                // Εισαγωγή της αγοράς στον πίνακα transactions
                 await db.run(
                     `INSERT INTO transactions (walletAddress, product, amount) VALUES (?, ?, ?)`,
                     walletAddress, product, amount
@@ -119,10 +129,7 @@ wss.on('connection', (ws: WebSocket) => {
 server.listen(PORT, () => {
     console.log(`Server is listening on http://localhost:${PORT}`);
     console.log(`For more users in the LAN, try http://${getIpAddress()}:${PORT}`);
-    // Νέο μήνυμα για την Eshop σελίδα
-    console.log(`Eshop Backend Live: http://localhost:${PORT}/`); 
-    // Οι παλιές γραμμές για Login/Game page έχουν διαγραφεί.
-    // Η λογική activeTokens έχει αφαιρεθεί αφού δεν χρησιμοποιείται για logins
+    console.log(`Eshop Backend Live: http://localhost:${PORT}/`);
 });
 
 // === Βοηθητική συνάρτηση για IP Address ===
@@ -139,5 +146,5 @@ function getIpAddress(): string {
             }
         }
     }
-    return '127.0.0.1'; // Fallback σε localhost αν δεν βρεθεί IP LAN
+    return '127.0.0.1';
 }

@@ -3,7 +3,7 @@ export type Product = {
 	name: string;
 	price: number;
 	image: string;
-	discountPercent: number;
 	dealEndsAt?: Date;
+	purchasePercent?: number;
   };
   

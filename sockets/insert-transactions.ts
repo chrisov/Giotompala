@@ -3,7 +3,8 @@ import { open } from 'sqlite';
 import path from 'path';
 
 async function insertSampleTransactions(num: number) {
-    const dbPath = path.join(process.cwd(), 'purchases.db'); // ΣΩΣΤΟ: process.cwd()
+    // ΕΔΩ ΠΡΟΣΘΕΤΟΥΜΕ ΤΟΝ ΦΑΚΕΛΟ 'sockets' ΣΤΗ ΔΙΑΔΡΟΜΗ
+    const dbPath = path.join(process.cwd(), 'purchases.db');
     console.log(`[DB] Attempting to open database at: ${dbPath}`);
 
     let db;
